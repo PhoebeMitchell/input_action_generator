@@ -1,7 +1,19 @@
 @tool
 extends EditorPlugin
 
+const key = "input_action_generator/output_path"
+
 func _enter_tree() -> void:
+	var settings = EditorInterface.get_editor_settings()
+	if not settings.has_setting(key):
+		settings.set_setting(key, "res://")
+		settings.add_property_info({
+			"name": key,
+			"type": TYPE_STRING,
+			"hint": PROPERTY_HINT_DIR,
+		})
+		settings.save()
+	
 	add_tool_menu_item("Generate Input Actions", Callable(self, "_run"))
 	pass
 
@@ -12,8 +24,19 @@ func _exit_tree() -> void:
 
 
 func _run():
-	var path = "res://Scripts/InputActions.cs"
+	var settings = EditorInterface.get_editor_settings()
+	var path = settings.get_setting(key)
+		
+	if not path.get_extension().is_empty():
+		path = path.get_base_dir()
+		
+	if not DirAccess.dir_exists_absolute(path):
+		DirAccess.make_dir_recursive_absolute(path)
+	
+	path = path.path_join("InputActions.cs");
+	
 	var file = FileAccess.open(path, FileAccess.WRITE)
+		
 	if not file:
 		push_error("Could not open file: %s" % path)
 		return
@@ -22,7 +45,6 @@ func _run():
 	file.store_line("public static class InputActions")
 	file.store_line("{")
 	
-	# Read from project.godot
 	var config = ConfigFile.new()
 	var err = config.load("res://project.godot")
 	if err != OK:
@@ -40,3 +62,6 @@ func _run():
 	file.store_line("}")
 	file.close()
 	print("Generated InputActions.cs successfully.")
+	
+	var fs = EditorInterface.get_resource_filesystem();
+	fs.scan()
