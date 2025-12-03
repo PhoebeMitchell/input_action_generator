@@ -1,6 +1,6 @@
 # Summary
 
-Godot plugin for generating input actions from the actions.
+Godot plugin for generating input actions.
 
 Creates a C# class with properties for each action defined in a project's input map.
 
