@@ -12,7 +12,6 @@ func _enter_tree() -> void:
 			"type": TYPE_STRING,
 			"hint": PROPERTY_HINT_DIR,
 		})
-		settings.save()
 	
 	add_tool_menu_item("Generate Input Actions", Callable(self, "_run"))
 	pass
